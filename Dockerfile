@@ -9,14 +9,17 @@ RUN apt-get update && apt-get install -y \
 # Crear directorio de trabajo
 WORKDIR /app
 
-# Copiar archivos
+# Copiar todo
 COPY . .
 
-# Instalar dependencias de Python
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+# Cambiar directorio de trabajo a la carpeta del backend
+WORKDIR /app/api
 
-# Exponer puerto
+# Instalar dependencias
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r ../requirements.txt
+
+# Exponer el puerto de la API
 EXPOSE 8000
 
 # Comando por defecto
