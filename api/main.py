@@ -43,7 +43,7 @@ from langchain_deepseek import ChatDeepSeek
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-from .translation import translate_text
+from translation import translate_text
 
 from transformers import pipeline
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
@@ -1013,7 +1013,7 @@ if __name__ == "__main__":
     print(f"🌍 Entorno: {settings.environment}")
     
     uvicorn.run(
-        "api.main:app",
+        app,
         host="0.0.0.0",
         port=port,
         log_level="info",
@@ -1048,3 +1048,5 @@ def detect_document_language(docs: List[Document]) -> str:
     except Exception as e:
         logger.warning(f"Error detectando idioma de documentos: {e}")
         return "en"
+
+app_instance = app

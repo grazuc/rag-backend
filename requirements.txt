@@ -8,6 +8,7 @@ langchain-huggingface
 langchain-deepseek
 nest_asyncio
 
+python-multipart
 sentence-transformers
 transformers
 sentencepiece
