@@ -1013,7 +1013,7 @@ if __name__ == "__main__":
     print(f"🌍 Entorno: {settings.environment}")
     
     uvicorn.run(
-        "main:app",
+        "api.main:app",
         host="0.0.0.0",
         port=port,
         log_level="info",
