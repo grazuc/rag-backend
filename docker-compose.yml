@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  rag-backend:
+    build: .
+    container_name: rag-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    volumes:
+      - ./docs:/app/docs
+    restart: unless-stopped
+
