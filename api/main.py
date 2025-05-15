@@ -51,6 +51,8 @@ from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
 import shutil
 import subprocess
 from supabase import create_client, Client  # pip install supabase
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 # MODIFICADO: Configuración de logging mejorada
 logging.basicConfig(
@@ -687,6 +689,9 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+def sanitize_pg_identifier(name: str) -> str:
+    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
+
 def get_vectorstore_for_collection(collection_name: str):
     """Return a vectorstore for a specific collection (no cache)."""
     return PGVector(
@@ -731,19 +736,20 @@ async def query_documents(
     start_time = time.time()
     
     try:
-        userId = request_data.userId
+        if not request_data.userId:
+            request_data.userId = verify_google_token(request.headers.get('Authorization'))
         documentId = request_data.documentId
 
         # Dynamic collection name
-        collection_name = settings.collection_name
-        if userId and documentId:
-            collection_name = f"{userId}_{documentId}"
+
+        if request_data.userId and documentId:
+            collection_name = sanitize_pg_identifier(f"{request_data.userId}_{documentId}")
 
         # Use custom retriever for this collection
         retriever = get_retriever_for_collection(collection_name)
 
         # --- Supabase logic example (fetch user metadata) ---
-        # user_meta = supabase.table("users").select("*").eq("id", userId).single().execute()
+        # user_meta = supabase.table("users").select("*").eq("id", request_data.userId).single().execute()
         # logger.info(f"User metadata: {user_meta.data}")
 
         # Validación de entrada
@@ -936,68 +942,161 @@ async def query_documents(
             detail="Internal server error"
         )
 
+def generate_document_id(user_id: str, filename: str) -> str:
+    """Genera un documentId único basado en userId, nombre de archivo y timestamp"""
+    name_part = filename.rsplit(".", 1)[0].replace(" ", "_").lower()
+    timestamp = int(time.time())
+    return f"{user_id}_{name_part}_{timestamp}"
+
+
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
     userId: str = Form(None),
-    documentId: str = Form(None)
+    documentId: str = Form(None),
+    request: Request = None
 ):
-    allowed_extensions = {"pdf", "docx", "txt"}
-    filename = file.filename
-    ext = filename.split(".")[-1].lower()
-    if ext not in allowed_extensions:
-        raise HTTPException(status_code=400, detail="Tipo de archivo no soportado. Solo PDF, DOCX y TXT.")
-
-    # Create a user-specific directory if userId is provided
-    docs_dir = os.path.join(os.path.dirname(__file__), "../docs")
-    if userId:
-        docs_dir = os.path.join(docs_dir, userId)
-        if documentId:
-            docs_dir = os.path.join(docs_dir, documentId)
-    
-    os.makedirs(docs_dir, exist_ok=True)
-    file_path = os.path.join(docs_dir, filename)
-
-    # Save file
     try:
-        with open(file_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-    except Exception as e:
-        logger.error(f"Error guardando archivo: {e}")
-        raise HTTPException(status_code=500, detail="Error al guardar el archivo.")
+        # Validar extensiones permitidas
+        allowed_extensions = {"pdf", "docx", "txt"}
+        filename = file.filename
+        ext = filename.split(".")[-1].lower()
+        if ext not in allowed_extensions:
+            raise HTTPException(status_code=400, detail="Tipo de archivo no soportado. Solo PDF, DOCX y TXT.")
 
-    # Use the Python of the current environment
-    python_exec = sys.executable
-    logger.info(f"Usando Python para ingest: {python_exec}")
-
-    # Run ingest.py as a subprocess to index ONLY this file
-    try:
-        ingest_path = os.path.join(os.path.dirname(__file__), "../ingest.py")
+        # Usar rutas absolutas para evitar problemas relativos
+        base_dir = os.path.abspath(os.path.dirname(__file__))
+        docs_base_dir = os.path.join(base_dir, "..", "docs")
         
-        # Add collection name based on user and document if provided
+        # Crear directorio específico según userId y documentId
+        target_dir = docs_base_dir
         collection_name = settings.collection_name
-        if userId and documentId:
-            collection_name = f"{userId}_{documentId}"
         
-        result = subprocess.run([
-            python_exec, ingest_path,
-            "--docs-dir", docs_dir,
-            "--extensions", ext,
+        if userId:
+            target_dir = os.path.join(target_dir, userId)
+    
+            if not documentId:
+                documentId = generate_document_id(userId, filename)
+                logger.info(f"[Auto-ID] documentId generado: {documentId}")
+    
+            target_dir = os.path.join(target_dir, documentId)
+            collection_name = sanitize_pg_identifier(f"{userId}_{documentId}")
+        
+        # Asegurar que el directorio existe con permisos adecuados
+        os.makedirs(target_dir, exist_ok=True)
+        # Intentar establecer permisos (puede fallar en algunos entornos)
+        try:
+            os.chmod(target_dir, 0o755)
+        except:
+            pass
+            
+        # Ruta completa del archivo
+        file_path = os.path.join(target_dir, filename)
+        
+        # Guardar archivo con mejor manejo de errores
+        try:
+            with open(file_path, "wb") as buffer:
+                # Leer en chunks para archivos grandes
+                CHUNK_SIZE = 1024 * 1024  # 1MB
+                content = await file.read(CHUNK_SIZE)
+                while content:
+                    buffer.write(content)
+                    content = await file.read(CHUNK_SIZE)
+                    
+            # Verificar que el archivo se guardó correctamente
+            if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+                raise ValueError("El archivo no se guardó correctamente o está vacío")
+                
+            logger.info(f"Archivo guardado en: {file_path}")
+        except Exception as e:
+            logger.error(f"Error guardando archivo: {str(e)}")
+            return JSONResponse(
+                status_code=500,
+                content={"detail": f"Error al guardar el archivo: {str(e)}"}
+            )
+        
+        # Ejecutar ingest.py como subproceso
+        python_exec = sys.executable
+        ingest_path = os.path.abspath(os.path.join(base_dir, "..", "ingest.py"))
+        
+        logger.info(f"Ejecutando: {python_exec} {ingest_path}")
+        logger.info(f"Parámetros: docs_dir={target_dir}, ext={ext}, collection={collection_name}")
+        
+        # Construir comando con argumentos explícitos
+        cmd = [
+            python_exec, 
+            ingest_path,
+            "--docs-dir", target_dir,
+            f"--extensions={ext}",
             "--collection", collection_name,
-            "--reset-cache",
-        ], capture_output=True, text=True, timeout=600)
+            "--reset-cache"
+        ]
         
-        if result.returncode != 0:
-            logger.error(f"Error en ingest.py: {result.stderr}")
-            raise HTTPException(status_code=500, detail=f"Error al procesar el documento: {result.stderr}")
-    except subprocess.TimeoutExpired:
-        logger.error("Ingest timeout")
-        raise HTTPException(status_code=500, detail="El procesamiento del documento excedió el tiempo límite.")
+        try:
+            # Ejecutar con límite de tiempo ampliado
+            process = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            
+            # Esperar con timeout
+            try:
+                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=900)  # 15 minutos
+                
+                stdout_text = stdout.decode('utf-8', errors='replace')
+                stderr_text = stderr.decode('utf-8', errors='replace')
+                
+                if process.returncode != 0:
+                    logger.error(f"Error en ingest.py (código {process.returncode}):")
+                    logger.error(f"STDOUT: {stdout_text[:1000]}")
+                    logger.error(f"STDERR: {stderr_text[:1000]}")
+                    return JSONResponse(
+                        status_code=500,
+                        content={
+                            "detail": "Error al procesar el documento",
+                            "stdout": stdout_text[:500],
+                            "stderr": stderr_text[:500]
+                        }
+                    )
+                else:
+                    logger.info("Ingesta completada exitosamente")
+                    logger.debug(f"STDOUT: {stdout_text[:500]}")
+                    
+            except asyncio.TimeoutError:
+                # Intentar terminar el proceso
+                try:
+                    process.terminate()
+                    await asyncio.sleep(0.5)
+                    process.kill()
+                except:
+                    pass
+                    
+                logger.error("Timeout ejecutando ingest.py")
+                return JSONResponse(
+                    status_code=500,
+                    content={"detail": "El procesamiento del documento excedió el tiempo límite (15 minutos)"}
+                )
+                
+        except Exception as e:
+            logger.error(f"Error ejecutando ingest.py: {str(e)}")
+            logger.error(traceback.format_exc())
+            return JSONResponse(
+                status_code=500,
+                content={"detail": f"Error al ejecutar el proceso de ingesta: {str(e)}"}
+            )
+            
+        return {"detail": "Documento procesado correctamente", "filepath": file_path, "documentId": documentId, "collection": collection_name}
+        
+    except HTTPException as he:
+        raise he
     except Exception as e:
-        logger.error(f"Error ejecutando ingest.py: {e}")
-        raise HTTPException(status_code=500, detail="Error al indexar el documento.")
-
-    return {"detail": "Documento procesado correctamente"}
+        logger.error(f"Error inesperado en upload: {str(e)}")
+        logger.error(traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Error inesperado: {str(e)}"}
+        )
 
 # MODIFICADO: Punto de entrada mejorado
 if __name__ == "__main__":
@@ -1050,3 +1149,14 @@ def detect_document_language(docs: List[Document]) -> str:
         return "en"
 
 app_instance = app
+
+def verify_google_token(auth_header: str) -> str:
+    if not auth_header or not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Token inválido o faltante")
+    token = auth_header.split(" ")[1]
+    try:
+        idinfo = id_token.verify_oauth2_token(token, requests.Request())
+        user_id = idinfo.get("sub")
+        return user_id
+    except Exception as e:
+        raise HTTPException(status_code=401, detail="Token inválido")

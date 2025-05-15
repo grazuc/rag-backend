@@ -71,7 +71,7 @@ class IngestConfig:
     chunk_overlap: int = 64  # Chunk overlap base
     batch_size: int = 128  # Batch size más grande para mejor rendimiento
     max_workers: int = None  # Permitir autodetección
-    max_embed_workers: int = 4  # Workers para embeddings
+    max_embed_workers: int = 1  # Workers para embeddings
     allowed_languages: Set[str] = field(default_factory=lambda: {"es", "en"})
     file_extensions: List[str] = field(default_factory=lambda: ["pdf", "txt", "docx", "md"])
     deduplication: bool = True
@@ -110,7 +110,7 @@ def load_config() -> Tuple[IngestConfig, str]:
                         help="Tamaño de lote para inserción en BD")
     parser.add_argument("--workers", type=int, default=None,
                         help="Número de workers para procesamiento paralelo (None=auto)")
-    parser.add_argument("--embed-workers", type=int, default=4,
+    parser.add_argument("--embed-workers", type=int, default=1,
                         help="Número de workers para embeddings paralelos")
     parser.add_argument("--langs", type=str, default="es,en",
                         help="Idiomas permitidos (códigos ISO separados por comas)")
@@ -196,9 +196,9 @@ class DocumentProcessor:
         files_to_process = []
         
         for ext in self.config.file_extensions:
-            for file_path in self.config.docs_dir.glob(f"*.{ext}"):
+            for file_path in self.config.docs_dir.rglob(f"*.{ext}"):
                 # Obtener información del archivo
-                file_key = file_path.name
+                file_key = str(file_path.relative_to(self.config.docs_dir))
                 file_stat = file_path.stat()
                 file_size = file_stat.st_size
                 file_mtime = file_stat.st_mtime
@@ -323,6 +323,10 @@ def detect_language(text: str, min_length_for_detection: int = 20, fallback_lang
         logger.warning(f"Fallo en detección de idioma: '{stripped_text[:50]}...'. Error: {e}")
         return fallback_lang
 
+
+def sanitize_pg_identifier(name: str) -> str:
+    """Convierte un nombre arbitrario a un identificador SQL seguro para PostgreSQL"""
+    return re.sub(r'[^a-zA-Z0-9_]', '_', name)
 
 def compute_text_hash(text: str) -> str:
     """Calcula un hash del texto para deduplicación"""
@@ -1155,31 +1159,32 @@ def optimize_vector_search_config(pg_conn: str, collection_name: str):
         cursor = conn.cursor()
         
         # Verificar existencia de índices
+        safe_name = sanitize_pg_identifier(collection_name)
         cursor.execute(f"""
             SELECT indexname, indexdef
             FROM pg_indexes
-            WHERE tablename = '{collection_name.lower()}'
+            WHERE tablename = '{safe_name}'
         """)
         existing_indexes = cursor.fetchall()
         index_names = [idx[0] for idx in existing_indexes]
         
         # Crear índice GIN para búsquedas rápidas en metadatos
-        metadata_index_name = f"{collection_name.lower()}_metadata_gin_idx"
+        metadata_index_name = f"{safe_name}_metadata_gin_idx"
         if metadata_index_name not in index_names:
             logger.info(f"Creando índice GIN para metadatos en {collection_name}")
             cursor.execute(f"""
                 CREATE INDEX IF NOT EXISTS {metadata_index_name}
-                ON langchain_pg_embedding.{collection_name.lower()} USING GIN (metadata);
+                ON public.{safe_name} USING GIN (metadata);
             """)
         
         # Optimizar índice vectorial existente para mejorar eficiencia
         cursor.execute(f"""
-            ALTER INDEX langchain_pg_embedding.{collection_name.lower()}_langchain_vector_idx
+            ALTER INDEX public.{safe_name}_langchain_vector_idx
             SET (lists_growth_with_size = yes, intermediate_compression_threshold = 1024);
         """)
         
         # Crear vista materializada para consultas frecuentes
-        view_name = f"{collection_name.lower()}_search_view"
+        view_name = f"{safe_name}_search_view"
         cursor.execute(f"""
             SELECT relname FROM pg_class 
             WHERE relkind = 'm' AND relname = '{view_name}'
@@ -1187,27 +1192,27 @@ def optimize_vector_search_config(pg_conn: str, collection_name: str):
         if not cursor.fetchone():
             logger.info(f"Creando vista materializada para búsqueda en {collection_name}")
             cursor.execute(f"""
-                CREATE MATERIALIZED VIEW IF NOT EXISTS langchain_pg_embedding.{view_name} AS
+                CREATE MATERIALIZED VIEW IF NOT EXISTS public.{view_name} AS
                 SELECT uuid, document, embedding, metadata, 
                        metadata->>'source' as source,
                        metadata->>'language' as language,
                        metadata->>'doc_type' as doc_type,
                        metadata->>'chunk_id' as chunk_id
-                FROM langchain_pg_embedding.{collection_name.lower()};
+                FROM public.{safe_name};
                 
                 CREATE INDEX IF NOT EXISTS {view_name}_source_idx
-                ON langchain_pg_embedding.{view_name} (source);
+                ON public.{view_name} (source);
                 
                 CREATE INDEX IF NOT EXISTS {view_name}_language_idx
-                ON langchain_pg_embedding.{view_name} (language);
+                ON public.{view_name} (language);
                 
                 CREATE INDEX IF NOT EXISTS {view_name}_doc_type_idx
-                ON langchain_pg_embedding.{view_name} (doc_type);
+                ON public.{view_name} (doc_type);
             """)
         
         # Configurar parámetros para optimización de búsqueda vectorial
         cursor.execute(f"""
-            ALTER TABLE langchain_pg_embedding.{collection_name.lower()}
+            ALTER TABLE public.{safe_name}
             SET (autovacuum_vacuum_scale_factor = 0.05, autovacuum_analyze_scale_factor = 0.02);
         """)
         
@@ -1231,7 +1236,7 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
         
         # Contar total de documentos
         cursor.execute(f"""
-            SELECT COUNT(*) FROM langchain_pg_embedding.{collection_name.lower()};
+            SELECT COUNT(*) FROM public.{safe_name};
         """)
         total_docs = cursor.fetchone()[0]
         
@@ -1241,7 +1246,7 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
                 COUNT(DISTINCT metadata->>'source') as unique_sources,
                 COUNT(DISTINCT metadata->>'language') as unique_languages,
                 COUNT(DISTINCT metadata->>'doc_type') as unique_doc_types
-            FROM langchain_pg_embedding.{collection_name.lower()};
+            FROM public.{safe_name};
         """)
         metadata_stats = cursor.fetchone()
         
@@ -1250,7 +1255,7 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
             SELECT AVG(array_length(embedding, 1)) as avg_dimensions,
                    MIN(array_length(embedding, 1)) as min_dimensions,
                    MAX(array_length(embedding, 1)) as max_dimensions
-            FROM langchain_pg_embedding.{collection_name.lower()};
+            FROM public.{safe_name};
         """)
         dimension_stats = cursor.fetchone()
         
@@ -1261,7 +1266,7 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
                 AVG((metadata->>'content_quality')::float) as avg_quality,
                 MIN((metadata->>'content_quality')::float) as min_quality,
                 MAX((metadata->>'content_quality')::float) as max_quality
-            FROM langchain_pg_embedding.{collection_name.lower()}
+            FROM public.{safe_name}
             WHERE metadata->>'word_count' IS NOT NULL;
         """)
         content_stats = cursor.fetchone()
@@ -1269,12 +1274,12 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
         # Información de fragmentación
         cursor.execute(f"""
             SELECT 
-                pg_size_pretty(pg_total_relation_size('langchain_pg_embedding.{collection_name.lower()}')) as total_size,
-                pg_size_pretty(pg_table_size('langchain_pg_embedding.{collection_name.lower()}')) as table_size,
-                pg_size_pretty(pg_indexes_size('langchain_pg_embedding.{collection_name.lower()}')) as index_size
+                pg_size_pretty(pg_total_relation_size('public.{safe_name}')) as total_size,
+                pg_size_pretty(pg_table_size('public.{safe_name}')) as table_size,
+                pg_size_pretty(pg_indexes_size('public.{safe_name}')) as index_size
             FROM pg_catalog.pg_class c
             LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
-            WHERE c.relname = '{collection_name.lower()}' AND n.nspname = 'langchain_pg_embedding';
+            WHERE c.relname = '{safe_name}' AND n.nspname = 'public';
         """)
         size_stats = cursor.fetchone()
         
@@ -1306,7 +1311,7 @@ def monitor_vector_db_health(pg_conn: str, collection_name: str):
         cursor.execute(f"""
             SELECT reltuples::bigint, relpages::bigint
             FROM pg_class
-            WHERE relname = '{collection_name.lower()}';
+            WHERE relname = '{safe_name}';
         """)
         rel_stats = cursor.fetchone()
         
