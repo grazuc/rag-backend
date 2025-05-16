@@ -508,11 +508,10 @@ class AsyncQueryCache:
         self.ttl = timedelta(hours=ttl_hours)
         self._lock = asyncio.Lock()
 
-    async def get(self, query: str) -> Optional[QueryResponse]:
+    async def get(self, query: str, user_id: str, document_id: Optional[str] = None) -> Optional[QueryResponse]:
         """Obtiene una respuesta cacheada si existe y no ha expirado"""
         async with self._lock:
-            # Normalizar la consulta para mejor matching
-            normalized_query = query.lower().strip()
+            normalized_key = f"{user_id}::{document_id or 'global'}::{query.lower().strip()}"
             
             # Limpiar entradas expiradas
             now = datetime.now()
@@ -523,18 +522,16 @@ class AsyncQueryCache:
             
             # Buscar coincidencia exacta o similar
             for cached_query, cache_data in self.cache.items():
-                if (cached_query == normalized_query or 
-                    (len(normalized_query) > 10 and 
-                     self._similarity_score(cached_query, normalized_query) > 0.9)):
-                    return cache_data["response"]
+                if normalized_key in self.cache:
+                    return self.cache[normalized_key]["response"]
             
             return None
 
-    async def set(self, query: str, response: QueryResponse) -> None:
+    async def set(self, query: str, response: QueryResponse, user_id: str, document_id: Optional[str] = None) -> None:
         """Almacena una respuesta en caché"""
         async with self._lock:
-            normalized_query = query.lower().strip()
-            self.cache[normalized_query] = {
+            normalized_key = f"{user_id}::{document_id or 'global'}::{query.lower().strip()}"
+            self.cache[normalized_key] = {
                 "response": response,
                 "timestamp": datetime.now()
             }
@@ -774,7 +771,7 @@ async def query_documents(
         logger.info(f"Nueva consulta recibida: {json.dumps(query_log)}")
         
         # Verificar caché antes de procesar
-        cached_response = await query_cache.get(request_data.query)
+        cached_response = await query_cache.get(request_data.query, userId, documentId)
         if cached_response:
             logger.info(f"Respuesta obtenida de caché para query similar a: '{request_data.query}'")
             cached_response.execution_time = round(time.time() - start_time, 4)
@@ -925,7 +922,7 @@ async def query_documents(
             )
             
             # Almacenar en caché
-            await query_cache.set(original_query, response)
+            await query_cache.set(original_query, response, userId, documentId)
             
             return response
             
