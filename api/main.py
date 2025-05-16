@@ -1026,7 +1026,8 @@ async def upload_document(
             "--docs-dir", target_dir,
             f"--extensions={ext}",
             "--collection", collection_name,
-            "--reset-cache"
+            "--reset-cache",
+            "--reset-vector-collection",
         ]
         
         try:
