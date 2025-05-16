@@ -103,22 +103,13 @@ class Settings(BaseSettings):
 # MODIFICADO: Funciones cacheadas para componentes
 @lru_cache(maxsize=1)
 def get_llm():
-    """Inicializa y retorna el modelo LLM"""
-    try:
-        if settings.llm_model == "deepseek-chat":
-            callback_manager = CallbackManager([StreamingStdOutCallbackHandler()])
-            return ChatDeepSeek(
-                api_key=settings.deepseek_api_key,
-                model_name="deepseek-chat",
-                temperature=0.3,
-                max_tokens=1000,
-                callback_manager=callback_manager
-            )
-        else:
-            raise ValueError(f"Modelo LLM no soportado: {settings.llm_model}")
-    except Exception as e:
-        logger.error(f"Error al inicializar LLM: {e}")
-        raise RuntimeError(f"No se pudo inicializar el modelo LLM: {e}")
+    return ChatDeepSeek(
+        api_key=settings.deepseek_api_key,
+        model_name="deepseek-chat",
+        temperature=0.3,
+        max_tokens=1000
+    )
+
 
 @lru_cache(maxsize=1)
 def get_qa_prompt():
@@ -139,18 +130,9 @@ Respuesta:""",
         input_variables=["context", "question"]
     )
 
-@lru_cache(maxsize=1)
 def get_qa_chain():
-    """Inicializa y retorna el QA chain"""
-    try:
-        return LLMChain(
-            llm=get_llm(),
-            prompt=get_qa_prompt(),
-            verbose=True
-        )
-    except Exception as e:
-        logger.error(f"Error al inicializar QA chain: {e}")
-        raise RuntimeError(f"No se pudo inicializar el QA chain: {e}")
+    return LLMChain(llm=get_llm(), prompt=get_qa_prompt())
+
 
 @lru_cache(maxsize=1)
 async def get_deepseek_query_rewriter_llm():

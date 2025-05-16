@@ -1479,6 +1479,8 @@ def main():
     try:
         # Cargar configuración
         config, pg_conn = load_config()
+        logger.info(f"ARGUMENTOS RECIBIDOS:" ,sys.argv)
+        print("🧪 ARGUMENTOS RECIBIDOS:", sys.argv)
         logger.info(f"Configuración de ingesta cargada: {vars(config)}")
 
         # Verificar directorio de documentos
@@ -1630,6 +1632,8 @@ def main():
             # 7. Inserción en PGVector
             db_insert_start_time = time.time()
             logger.info(f"Insertando {len(doc_embed_pairs)} embeddings en PGVector...")
+            print(f"🧪 INSERTANDO en colección: {config.collection_name}")
+            print(f"🧪 RESET COLLECTION: {config.reset_vector_collection}")
             insert_into_pgvector(doc_embed_pairs, pg_conn, config.collection_name, embeddings, config)
             stage_times["db_insertion"] = time.time() - db_insert_start_time
             logger.info(f"Inserción en base de datos completada en {stage_times['db_insertion']:.2f}s")
