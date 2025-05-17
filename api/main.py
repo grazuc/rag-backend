@@ -714,22 +714,32 @@ async def query_documents(
 ):
     start_time = time.time()
     
+    # LOG: Datos de entrada
+    logger.info(f"QUERY: userId={request_data.userId}, documentId={request_data.documentId}, query='{request_data.query[:80]}'")
+    
     try:
         if not request_data.userId:
             request_data.userId = verify_google_token(request.headers.get('Authorization'))
         documentId = request_data.documentId
 
         # Dynamic collection name
-
         if request_data.userId and documentId:
             collection_name = sanitize_pg_identifier(f"{request_data.userId}_{documentId}")
+        else:
+            collection_name = settings.collection_name  # fallback
+
+        # LOG: Nombre de la colección usada
+        logger.info(f"QUERY: Using collection_name='{collection_name}'")
 
         # Use custom retriever for this collection
         retriever = get_retriever_for_collection(collection_name)
 
-        # --- Supabase logic example (fetch user metadata) ---
-        # user_meta = supabase.table("users").select("*").eq("id", request_data.userId).single().execute()
-        # logger.info(f"User metadata: {user_meta.data}")
+        # LOG: Verifica si la respuesta viene del caché
+        cached_response = await query_cache.get(request_data.query, request_data.userId, documentId)
+        if cached_response:
+            logger.info(f"QUERY: Response served from cache for collection_name='{collection_name}'")
+            cached_response.execution_time = round(time.time() - start_time, 4)
+            return cached_response
 
         # Validación de entrada
         if not request_data.query.strip():
@@ -752,13 +762,6 @@ async def query_documents(
         }
         logger.info(f"Nueva consulta recibida: {json.dumps(query_log)}")
         
-        # Verificar caché antes de procesar
-        cached_response = await query_cache.get(request_data.query, userId, documentId)
-        if cached_response:
-            logger.info(f"Respuesta obtenida de caché para query similar a: '{request_data.query}'")
-            cached_response.execution_time = round(time.time() - start_time, 4)
-            return cached_response
-            
         # Procesar consulta con timeout
         async with async_timeout.timeout(settings.query_timeout):
             # Reescritura de consulta si está habilitada
@@ -785,6 +788,13 @@ async def query_documents(
                 query_to_use,
                 settings.retrieval_timeout
             )
+            
+            # LOG: Sources devueltos por el retriever
+            if raw_source_docs:
+                sources = [doc.metadata.get("source", "unknown") for doc in raw_source_docs]
+                logger.info(f"QUERY: Sources returned for collection_name='{collection_name}': {sources}")
+            else:
+                logger.info(f"QUERY: No documents found for collection_name='{collection_name}'")
             
             if not raw_source_docs:
                 logger.warning("No se encontraron documentos relevantes")
@@ -904,7 +914,7 @@ async def query_documents(
             )
             
             # Almacenar en caché
-            await query_cache.set(original_query, response, userId, documentId)
+            await query_cache.set(original_query, response, request_data.userId, documentId)
             
             return response
             
