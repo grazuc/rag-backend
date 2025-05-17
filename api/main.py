@@ -494,20 +494,16 @@ class AsyncQueryCache:
         """Obtiene una respuesta cacheada si existe y no ha expirado"""
         async with self._lock:
             normalized_key = f"{user_id}::{document_id or 'global'}::{query.lower().strip()}"
-            
+
             # Limpiar entradas expiradas
             now = datetime.now()
             self.cache = {
                 k: v for k, v in self.cache.items()
                 if now - v["timestamp"] < self.ttl
             }
-            
-            # Buscar coincidencia exacta o similar
-            for cached_query, cache_data in self.cache.items():
-                if normalized_key in self.cache:
-                    return self.cache[normalized_key]["response"]
-            
-            return None
+
+            # ✅ Devuelve la entrada exacta
+            return self.cache.get(normalized_key, {}).get("response")
 
     async def set(self, query: str, response: QueryResponse, user_id: str, document_id: Optional[str] = None) -> None:
         """Almacena una respuesta en caché"""
@@ -679,30 +675,35 @@ def get_vectorstore_for_collection(collection_name: str):
         connection_string=settings.pg_conn
     )
 
-def get_retriever_for_collection(collection_name: str):
+def get_retriever_for_collection(collection_name: str, document_id: Optional[str] = None):
     """Return a retriever for a specific collection (no cache)."""
     vectorstore = get_vectorstore_for_collection(collection_name)
+    
+    filter_dict = {"document_id": document_id} if document_id else {}
+
     base_retriever = vectorstore.as_retriever(
         search_type="similarity",
         search_kwargs={
             "k": settings.initial_retrieval_k,
-            "filter": {},
+            "filter": filter_dict,
             "batch_size": settings.batch_size
         }
     )
+    
     device = "cuda" if torch.cuda.is_available() else "cpu"
     cross_enc = HuggingFaceCrossEncoder(
         model_name=settings.reranker_model,
         model_kwargs={"device": device}
     )
     reranker = CrossEncoderReranker(
-        model=cross_enc, 
+        model=cross_enc,
         top_n=settings.final_docs_count
     )
     return ContextualCompressionRetriever(
         base_compressor=reranker,
         base_retriever=base_retriever,
     )
+
 
 @app.post("/query", response_model=QueryResponse)
 async def query_documents(
@@ -732,7 +733,7 @@ async def query_documents(
         logger.info(f"QUERY: Using collection_name='{collection_name}'")
 
         # Use custom retriever for this collection
-        retriever = get_retriever_for_collection(collection_name)
+        retriever = get_retriever_for_collection(collection_name, documentId)
 
         # LOG: Verifica si la respuesta viene del caché
         cached_response = await query_cache.get(request_data.query, request_data.userId, documentId)
