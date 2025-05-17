@@ -20,6 +20,7 @@ pypdfium2
 torch
 langchain-huggingface
 
+google-auth
 psycopg2-binary
 pgvector
 

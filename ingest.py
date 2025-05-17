@@ -13,6 +13,7 @@ import argparse
 import logging
 import json
 import re
+import sys
 from typing import List, Dict, Optional, Set, Tuple, Any
 from pathlib import Path
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
@@ -713,8 +714,8 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
 
             logger.info(f"🧪 DOCUMENT_ID={os.environ.get('DOCUMENT_ID')}")
             logger.info(f"🧪 file_path.parent.name={file_path.parent.name}")
-
-            document_id = os.environ.get("DOCUMENT_ID") or file_path.parent.name or file_path.stem
+            
+            document_id = file_path.parent.name or file_path.stem
             chunk.metadata["document_id"] = document_id  # ← usa el nombre del directorio que es el documentId
             chunk.metadata["source"] = file_path.name
             chunk.metadata["extension"] = file_extension
