@@ -710,6 +710,10 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
             if keywords:
                 chunk.metadata["keywords"] = list(set(keywords))
 
+
+            logger.info(f"🧪 DOCUMENT_ID={os.environ.get('DOCUMENT_ID')}")
+            logger.info(f"🧪 file_path.parent.name={file_path.parent.name}")
+
             document_id = os.environ.get("DOCUMENT_ID") or file_path.parent.name or file_path.stem
             chunk.metadata["document_id"] = document_id  # ← usa el nombre del directorio que es el documentId
             chunk.metadata["source"] = file_path.name
@@ -722,6 +726,8 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
             # doc_type ya debería estar en doc_analysis_results si dynamic_chunking está activo
             chunk.metadata["doc_type"] = doc_analysis_results.get('doc_type', file_extension) if doc_analysis_results else file_extension
             chunk.metadata["process_date"] = datetime.now().isoformat()
+            logger.info(f"🧪 document_id final seteado: {document_id}")
+
 
             if i > 0:
                 chunk.metadata["prev_chunk_id"] = f"{file_path.name}-{i-1}"
