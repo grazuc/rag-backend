@@ -1024,11 +1024,15 @@ async def upload_document(
         ]
         
         try:
+            # Agregar el argumento --document-id si está presente
+            env = os.environ.copy()
+            env["DOCUMENT_ID"] = documentId
             # Ejecutar con límite de tiempo ampliado
             process = await asyncio.create_subprocess_exec(
                 *cmd,
                 stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE
+                stderr=asyncio.subprocess.PIPE,
+                env=env
             )
             
             # Esperar con timeout

@@ -710,7 +710,8 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
             if keywords:
                 chunk.metadata["keywords"] = list(set(keywords))
 
-            chunk.metadata["document_id"] = file_path.parent.name  # ← usa el nombre del directorio que es el documentId
+            document_id = os.environ.get("DOCUMENT_ID") or file_path.parent.name or file_path.stem
+            chunk.metadata["document_id"] = document_id  # ← usa el nombre del directorio que es el documentId
             chunk.metadata["source"] = file_path.name
             chunk.metadata["extension"] = file_extension
             chunk.metadata["ingest_time"] = time.time()
