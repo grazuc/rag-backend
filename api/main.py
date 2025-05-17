@@ -1038,9 +1038,12 @@ async def upload_document(
             # Esperar con timeout
             try:
                 stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=900)  # 15 minutos
-                
+
                 stdout_text = stdout.decode('utf-8', errors='replace')
                 stderr_text = stderr.decode('utf-8', errors='replace')
+                logger.info(f"[STDOUT ingest.py]\n{stdout_text[:1000]}")
+                logger.info(f"[STDERR ingest.py]\n{stderr_text[:1000]}")
+
                 
                 if process.returncode != 0:
                     logger.error(f"Error en ingest.py (código {process.returncode}):")
