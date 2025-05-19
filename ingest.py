@@ -710,10 +710,6 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
             keywords = re.findall(r'\b[A-Z]{3,}\b', chunk.page_content)
             if keywords:
                 chunk.metadata["keywords"] = list(set(keywords))
-
-
-            logger.info(f"🧪 DOCUMENT_ID={os.environ.get('DOCUMENT_ID')}")
-            logger.info(f"🧪 file_path.parent.name={file_path.parent.name}")
             
             document_id = file_path.parent.name or file_path.stem
             chunk.metadata["document_id"] = document_id  # ← usa el nombre del directorio que es el documentId
@@ -727,8 +723,6 @@ def process_file(file_path: Path, config: IngestConfig, doc_processor: DocumentP
             # doc_type ya debería estar en doc_analysis_results si dynamic_chunking está activo
             chunk.metadata["doc_type"] = doc_analysis_results.get('doc_type', file_extension) if doc_analysis_results else file_extension
             chunk.metadata["process_date"] = datetime.now().isoformat()
-            logger.info(f"🧪 document_id final seteado: {document_id}")
-
 
             if i > 0:
                 chunk.metadata["prev_chunk_id"] = f"{file_path.name}-{i-1}"
@@ -1488,8 +1482,6 @@ def main():
     try:
         # Cargar configuración
         config, pg_conn = load_config()
-        logger.info(f"ARGUMENTOS RECIBIDOS:" ,sys.argv)
-        print("🧪 ARGUMENTOS RECIBIDOS:", sys.argv)
         logger.info(f"Configuración de ingesta cargada: {vars(config)}")
 
         # Verificar directorio de documentos

@@ -717,7 +717,6 @@ async def query_documents(
     start_time = time.time()
     
     # LOG: Datos de entrada
-    logger.info(f"QUERY: userId={request_data.userId}, documentId={request_data.documentId}, query='{request_data.query[:80]}'")
     
     try:
         if not request_data.userId:
@@ -731,7 +730,6 @@ async def query_documents(
             collection_name = settings.collection_name  # fallback
 
         # LOG: Nombre de la colección usada
-        logger.info(f"QUERY: Using collection_name='{collection_name}'")
 
         # Use custom retriever for this collection
         retriever = get_retriever_for_collection(collection_name, documentId)
@@ -739,7 +737,6 @@ async def query_documents(
         # LOG: Verifica si la respuesta viene del caché
         cached_response = await query_cache.get(request_data.query, request_data.userId, documentId)
         if cached_response:
-            logger.info(f"QUERY: Response served from cache for collection_name='{collection_name}'")
             cached_response.execution_time = round(time.time() - start_time, 4)
             return cached_response
 
@@ -794,9 +791,7 @@ async def query_documents(
             # LOG: Sources devueltos por el retriever
             if raw_source_docs:
                 sources = [doc.metadata.get("source", "unknown") for doc in raw_source_docs]
-                logger.info(f"QUERY: Sources returned for collection_name='{collection_name}': {sources}")
             else:
-                logger.info(f"QUERY: No documents found for collection_name='{collection_name}'")
             
             if not raw_source_docs:
                 logger.warning("No se encontraron documentos relevantes")
