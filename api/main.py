@@ -80,7 +80,7 @@ class Settings(BaseSettings):
     api_key: Optional[str] = None
     cache_ttl_hours: int = Field(default=6, ge=1, le=24)
     environment: str = Field(default="production", pattern="^(production|development|testing)$")
-    cors_origins: List[str] = Field(default_factory=lambda: ["*"])
+    cors_origins: List[str] = Field(default_factory=lambda: ["https://rag-as-a-service.vercel.app"])
     query_rewrite_strategy: str = Field(default="original_only", pattern="^(original_only|rewrite_only|concatenate)$")
     max_retries: int = Field(default=3, ge=1, le=5)
     timeout_seconds: int = Field(default=30, ge=5, le=120)
