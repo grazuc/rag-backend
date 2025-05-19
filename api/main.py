@@ -792,8 +792,6 @@ async def query_documents(
             if raw_source_docs:
                 sources = [doc.metadata.get("source", "unknown") for doc in raw_source_docs]
             else:
-            
-            if not raw_source_docs:
                 logger.warning("No se encontraron documentos relevantes")
                 return QueryResponse(
                     answer="No se encontró información relevante en los documentos para responder a su pregunta.",
