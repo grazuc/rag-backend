@@ -1690,5 +1690,48 @@ def main():
         logger.critical(traceback.format_exc())
         raise
 
+# ingest.py
+
+def ingest_single_file(
+    file_path: Path,
+    config: IngestConfig,
+    doc_processor: DocumentProcessor,
+    embeddings_model: HuggingFaceEmbeddings,
+    pg_conn_str: str
+):
+    """
+    Ingiere un solo archivo desde FastAPI u otro backend en memoria, sin subprocess.
+    """
+    try:
+        logger.info(f"Ingestando archivo único: {file_path.name}")
+        chunks = process_file(file_path, config, doc_processor)
+        if not chunks:
+            logger.warning(f"No se generaron chunks para {file_path.name}")
+            return False
+
+        improved = improve_chunk_quality(chunks)
+        deduped = deduplicate_chunks(improved, config.similarity_threshold)
+
+        doc_embed_pairs = batch_process_embeddings(
+            deduped,
+            embeddings_model,
+            batch_size=config.batch_size
+        )
+
+        insert_into_pgvector(
+            doc_embed_pairs,
+            pg_conn=pg_conn_str,
+            collection_name=config.collection_name,
+            embeddings_model_instance=embeddings_model,
+            config=config
+        )
+
+        logger.info(f"Ingesta de {file_path.name} finalizada exitosamente")
+        return True
+
+    except Exception as e:
+        logger.error(f"Error en ingesta individual de {file_path.name}: {e}", exc_info=True)
+        return False
+
 if __name__ == "__main__":
     main()

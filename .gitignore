@@ -1,2 +1,5 @@
 .env
 /model_cache
+/docs
+/venv
+/__pycache__

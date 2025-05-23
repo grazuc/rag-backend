@@ -4280,3 +4280,256 @@ supabase_service_role_key
 connection to server at "lxmzevbsruombshafewg.supabase.co" (104.18.38.10), port 5432 failed: Connection timed out (0x0000274C/10060)
 	Is the server running on that host and accepting TCP/IP connections?
 
+2025-05-21 01:39:32,292 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 01:39:39,356 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 01:40:21,504 - api.main - ERROR - Error durante la inicialización: connection to server at "lxmzevbsruombshafewg.supabase.co" (104.18.38.10), port 5432 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+connection to server at "lxmzevbsruombshafewg.supabase.co" (172.64.149.246), port 5432 failed: Connection timed out (0x0000274C/10060)
+	Is the server running on that host and accepting TCP/IP connections?
+
+2025-05-21 01:44:04,131 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 01:44:09,825 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 01:44:10,924 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 01:44:10,925 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 01:44:10,938 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 01:44:10,938 - api.main - INFO - Memoria disponible: 0.80 GB
+2025-05-21 01:44:16,792 - api.main - INFO - Request: GET /docs | Status: 200 | Duration: 0.0010s | Client: 127.0.0.1
+2025-05-21 01:44:17,431 - api.main - INFO - Request: GET /openapi.json | Status: 200 | Duration: 0.0090s | Client: 127.0.0.1
+2025-05-21 01:45:06,802 - api.main - INFO - [Auto-ID] documentId generado: gorjito_1.xix_convenio_colect._estatal_empresas_consultoria_tecnologias_de_la_inf._estudios_de_mercado_y_de_la_opinion_publica_(1)_1747802706
+2025-05-21 01:45:06,815 - api.main - INFO - Archivo guardado en: C:\Users\Gonzalo\Desktop\cosas\rag-backend\api\..\docs\gorjito\gorjito_1.xix_convenio_colect._estatal_empresas_consultoria_tecnologias_de_la_inf._estudios_de_mercado_y_de_la_opinion_publica_(1)_1747802706\1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf
+2025-05-21 01:45:06,815 - ingest - INFO - Ingestando archivo único: 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf
+2025-05-21 01:45:06,815 - ingest - INFO - Procesando 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf...
+2025-05-21 01:45:09,306 - ingest - INFO - Chunking dinámico para 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf: size=338, overlap=112 (doc tipo: legal_pdf, densidad: 0.14)
+2025-05-21 01:45:14,525 - ingest - WARNING - Fallo en detección de idioma: '__________________________________________________...'. Error: No features in text.
+2025-05-21 01:45:14,563 - ingest - WARNING - Fallo en detección de idioma: '__________________________________________________...'. Error: No features in text.
+2025-05-21 01:45:14,597 - ingest - WARNING - Error al guardar chunks en caché: [Errno 2] No such file or directory: '.cache\\chunks_7c0c1cd933cd676b8a5835a141d447ae.pkl'
+2025-05-21 01:45:14,597 - ingest - ERROR - Error procesando 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf: [Errno 2] No such file or directory: '.cache\\processed_files.json'
+Traceback (most recent call last):
+  File "C:\Users\Gonzalo\Desktop\cosas\rag-backend\ingest.py", line 762, in process_file
+    doc_processor.mark_file_processed(file_path)
+  File "C:\Users\Gonzalo\Desktop\cosas\rag-backend\ingest.py", line 227, in mark_file_processed
+    self._save_processed_files()
+  File "C:\Users\Gonzalo\Desktop\cosas\rag-backend\ingest.py", line 189, in _save_processed_files
+    with open(self.cache_file, 'w', encoding='utf-8') as f:
+FileNotFoundError: [Errno 2] No such file or directory: '.cache\\processed_files.json'
+2025-05-21 01:45:14,603 - ingest - WARNING - No se generaron chunks para 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf
+2025-05-21 01:45:14,605 - api.main - INFO - Request: POST /upload | Status: 500 | Duration: 7.8202s | Client: 127.0.0.1
+2025-05-21 01:46:14,471 - api.main - INFO - [Auto-ID] documentId generado: gorjito_1.xix_convenio_colect._estatal_empresas_consultoria_tecnologias_de_la_inf._estudios_de_mercado_y_de_la_opinion_publica_(1)_1747802774
+2025-05-21 01:46:14,475 - api.main - INFO - Archivo guardado en: C:\Users\Gonzalo\Desktop\cosas\rag-backend\api\..\docs\gorjito\gorjito_1.xix_convenio_colect._estatal_empresas_consultoria_tecnologias_de_la_inf._estudios_de_mercado_y_de_la_opinion_publica_(1)_1747802774\1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf
+2025-05-21 01:46:14,475 - ingest - INFO - Ingestando archivo único: 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf
+2025-05-21 01:46:14,475 - ingest - INFO - Procesando 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf...
+2025-05-21 01:46:14,679 - ingest - INFO - Chunking dinámico para 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf: size=338, overlap=112 (doc tipo: legal_pdf, densidad: 0.14)
+2025-05-21 01:46:18,675 - ingest - WARNING - Fallo en detección de idioma: '__________________________________________________...'. Error: No features in text.
+2025-05-21 01:46:18,712 - ingest - WARNING - Fallo en detección de idioma: '__________________________________________________...'. Error: No features in text.
+2025-05-21 01:47:36,765 - ingest - INFO - Conectando a PGVector. Colección: manual_e5_multi. Reset colección: True
+2025-05-21 01:47:43,326 - ingest - INFO - Iniciando inserción de 711 embeddings en 8 lotes de tamaño 100.
+2025-05-21 01:47:56,867 - ingest - INFO - Insertados 711 documentos en la colección 'manual_e5_multi'.
+2025-05-21 01:47:56,867 - ingest - INFO - Ingesta de 1.XIX CONVENIO COLECT. ESTATAL EMPRESAS CONSULTORIA_TECNOLOGIAS DE LA INF._ESTUDIOS DE MERCADO Y DE LA OPINION PUBLICA (1).pdf finalizada exitosamente
+2025-05-21 01:47:56,889 - api.main - INFO - Request: POST /upload | Status: 200 | Duration: 102.4220s | Client: 127.0.0.1
+2025-05-21 01:49:47,768 - api.main - INFO - [Auto-ID] documentId generado: gorjito_1sy-f8199-sc_manual_de_usuario_sz150d_1747802987
+2025-05-21 01:49:47,778 - api.main - INFO - Archivo guardado en: C:\Users\Gonzalo\Desktop\cosas\rag-backend\api\..\docs\gorjito\gorjito_1sy-f8199-sc_manual_de_usuario_sz150d_1747802987\1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf
+2025-05-21 01:49:47,779 - ingest - INFO - Ingestando archivo único: 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf
+2025-05-21 01:49:47,780 - ingest - INFO - Procesando 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf...
+2025-05-21 01:49:48,460 - ingest - INFO - Chunking dinámico para 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf: size=397, overlap=128 (doc tipo: pdf, densidad: 0.19)
+2025-05-21 01:50:50,697 - ingest - INFO - Conectando a PGVector. Colección: manual_e5_multi. Reset colección: True
+2025-05-21 01:50:56,873 - ingest - INFO - Iniciando inserción de 426 embeddings en 5 lotes de tamaño 100.
+2025-05-21 01:51:05,791 - ingest - INFO - Insertados 426 documentos en la colección 'manual_e5_multi'.
+2025-05-21 01:51:05,791 - ingest - INFO - Ingesta de 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf finalizada exitosamente
+2025-05-21 01:51:05,797 - api.main - INFO - Request: POST /upload | Status: 200 | Duration: 78.0706s | Client: 127.0.0.1
+2025-05-21 01:54:23,031 - api.main - INFO - Inicializando modelo de embeddings
+2025-05-21 01:54:23,072 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 01:54:36,921 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747803276-c3f853", "timestamp": "2025-05-21T01:54:36.921470", "query_length": 43, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 01:54:37,928 - api.main - WARNING - No se encontraron documentos relevantes
+2025-05-21 01:54:37,929 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 14.9662s | Client: 127.0.0.1
+2025-05-21 01:56:05,363 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747803365-c3f853", "timestamp": "2025-05-21T01:56:05.363278", "query_length": 43, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 01:56:06,134 - api.main - WARNING - No se encontraron documentos relevantes
+2025-05-21 01:56:06,136 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 10.9387s | Client: 127.0.0.1
+2025-05-21 01:57:50,225 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747803470-91948d", "timestamp": "2025-05-21T01:57:50.225307", "query_length": 50, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 01:57:51,053 - api.main - WARNING - No se encontraron documentos relevantes
+2025-05-21 01:57:51,054 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 8.0604s | Client: 127.0.0.1
+2025-05-21 01:58:23,011 - api.main - ERROR - Error in query: 401: Token inválido o faltante
+2025-05-21 01:58:23,012 - api.main - INFO - Request: POST /query | Status: 500 | Duration: 0.0030s | Client: 127.0.0.1
+2025-05-21 01:58:26,342 - api.main - ERROR - Error in query: 401: Token inválido o faltante
+2025-05-21 01:58:26,342 - api.main - INFO - Request: POST /query | Status: 500 | Duration: 0.0016s | Client: 127.0.0.1
+2025-05-21 02:00:54,211 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:01:10,695 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:01:16,299 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:01:17,375 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:01:17,376 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:01:17,391 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:01:17,392 - api.main - INFO - Memoria disponible: 0.91 GB
+2025-05-21 02:01:42,595 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:01:48,973 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:01:50,012 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:01:50,012 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:01:50,019 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:01:50,020 - api.main - INFO - Memoria disponible: 0.92 GB
+2025-05-21 02:02:06,635 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:03:52,726 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:03:57,934 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:03:58,997 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:03:58,997 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:03:59,003 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:03:59,004 - api.main - INFO - Memoria disponible: 0.75 GB
+2025-05-21 02:04:11,151 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:04:23,212 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:04:28,427 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:04:29,438 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:04:29,438 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:04:29,444 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:04:29,445 - api.main - INFO - Memoria disponible: 0.75 GB
+2025-05-21 02:04:42,843 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:04:49,204 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:04:50,232 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:04:50,232 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:04:50,239 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:04:50,240 - api.main - INFO - Memoria disponible: 0.70 GB
+2025-05-21 02:05:38,674 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:05:50,548 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:05:55,761 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:05:56,825 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:05:56,826 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:05:56,831 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:05:56,832 - api.main - INFO - Memoria disponible: 0.70 GB
+2025-05-21 02:06:04,297 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:06:16,540 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:06:21,972 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:06:23,032 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:06:23,033 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:06:23,037 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:06:23,038 - api.main - INFO - Memoria disponible: 1.04 GB
+2025-05-21 02:06:25,439 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:06:37,242 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:06:42,131 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:06:43,148 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:06:43,148 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:06:43,153 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:06:43,153 - api.main - INFO - Memoria disponible: 1.04 GB
+2025-05-21 02:06:46,215 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:06:57,942 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:07:03,160 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:07:04,221 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:07:04,222 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:07:04,228 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:07:04,228 - api.main - INFO - Memoria disponible: 1.06 GB
+2025-05-21 02:07:16,163 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:07:21,371 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:07:22,400 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:07:22,400 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:07:22,405 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:07:22,406 - api.main - INFO - Memoria disponible: 1.00 GB
+2025-05-21 02:07:36,693 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:07:42,962 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:07:43,980 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:07:43,980 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:07:43,987 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:07:43,988 - api.main - INFO - Memoria disponible: 0.94 GB
+2025-05-21 02:07:59,018 - api.main - INFO - Request: GET /docs | Status: 200 | Duration: 0.0000s | Client: 127.0.0.1
+2025-05-21 02:07:59,569 - api.main - INFO - Request: GET /openapi.json | Status: 200 | Duration: 0.0090s | Client: 127.0.0.1
+2025-05-21 02:08:25,502 - api.main - INFO - [Auto-ID] documentId generado: gorjeles_1sy-f8199-sc_manual_de_usuario_sz150d_1747804105
+2025-05-21 02:08:25,513 - api.main - INFO - Archivo guardado en: C:\Users\Gonzalo\Desktop\cosas\rag-backend\api\..\docs\gorjeles\gorjeles_1sy-f8199-sc_manual_de_usuario_sz150d_1747804105\1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf
+2025-05-21 02:08:25,513 - ingest - INFO - Ingestando archivo único: 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf
+2025-05-21 02:08:25,513 - ingest - INFO - Procesando 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf...
+2025-05-21 02:08:26,719 - ingest - INFO - Chunking dinámico para 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf: size=397, overlap=128 (doc tipo: pdf, densidad: 0.19)
+2025-05-21 02:09:22,545 - ingest - INFO - Conectando a PGVector. Colección: gorjeles_gorjeles_1sy_f8199_sc_manual_de_usuario_sz150d_1747804105. Reset colección: True
+2025-05-21 02:09:27,712 - langchain_community.vectorstores.pgvector - WARNING - Collection not found
+2025-05-21 02:09:28,553 - ingest - INFO - Iniciando inserción de 426 embeddings en 5 lotes de tamaño 100.
+2025-05-21 02:09:36,843 - ingest - INFO - Insertados 426 documentos en la colección 'gorjeles_gorjeles_1sy_f8199_sc_manual_de_usuario_sz150d_1747804105'.
+2025-05-21 02:09:36,844 - ingest - INFO - Ingesta de 1SY-F8199-SC MANUAL DE USUARIO SZ150D.pdf finalizada exitosamente
+2025-05-21 02:09:36,853 - api.main - INFO - Request: POST /upload | Status: 200 | Duration: 71.3924s | Client: 127.0.0.1
+2025-05-21 02:10:23,806 - api.main - INFO - Inicializando modelo de embeddings
+2025-05-21 02:10:23,813 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:10:36,816 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747804236-949fc6", "timestamp": "2025-05-21T02:10:36.816137", "query_length": 65, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 02:10:45,679 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:10:52,282 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 28.4834s | Client: 127.0.0.1
+2025-05-21 02:10:52,286 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:10:52.286691", "query_length": 65, "num_sources": 4, "execution_time": 28.46378803253174, "language": "es"}
+2025-05-21 02:12:38,616 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747804358-9c42a8", "timestamp": "2025-05-21T02:12:38.616195", "query_length": 93, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 02:12:44,450 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:13:01,734 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 32.6731s | Client: 127.0.0.1
+2025-05-21 02:13:01,735 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:13:01.735227", "query_length": 93, "num_sources": 4, "execution_time": 32.65188765525818, "language": "es"}
+2025-05-21 02:13:43,371 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747804423-9797a7", "timestamp": "2025-05-21T02:13:43.371217", "query_length": 56, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 02:13:49,278 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:14:03,968 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 28.1273s | Client: 127.0.0.1
+2025-05-21 02:14:03,970 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:14:03.970017", "query_length": 56, "num_sources": 4, "execution_time": 28.12425994873047, "language": "es"}
+2025-05-21 02:16:32,064 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747804592-3faff3", "timestamp": "2025-05-21T02:16:32.064148", "query_length": 88, "detected_language": "es", "client_ip": "127.0.0.1", "detailed_feedback_requested": false}
+2025-05-21 02:16:37,737 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:16:47,566 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 25.6207s | Client: 127.0.0.1
+2025-05-21 02:16:47,568 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:16:47.568559", "query_length": 88, "num_sources": 3, "execution_time": 25.58131766319275, "language": "es"}
+2025-05-21 02:21:57,774 - api.main - INFO - Request: POST /query | Status: 422 | Duration: 0.0541s | Client: 127.0.0.1
+2025-05-21 02:28:10,164 - api.main - INFO - Request: GET / | Status: 404 | Duration: 0.0145s | Client: 127.0.0.1
+2025-05-21 02:28:10,577 - api.main - INFO - Request: GET /favicon.ico | Status: 404 | Duration: 0.0005s | Client: 127.0.0.1
+2025-05-21 02:29:26,187 - api.main - INFO - Request: OPTIONS //upload | Status: 400 | Duration: 0.0115s | Client: 127.0.0.1
+2025-05-21 02:29:49,998 - api.main - INFO - Request: OPTIONS /upload | Status: 400 | Duration: 0.0034s | Client: 127.0.0.1
+2025-05-21 02:30:21,084 - api.main - INFO - Request: OPTIONS /upload | Status: 400 | Duration: 0.0018s | Client: 127.0.0.1
+2025-05-21 02:32:06,022 - api.main - INFO - Cerrando recursos y conexiones
+2025-05-21 02:32:29,301 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:32:35,890 - api.main - INFO - Iniciando aplicación API RAG
+2025-05-21 02:32:36,992 - api.main - INFO - Conexión a base de datos verificada
+2025-05-21 02:32:36,993 - api.main - INFO - No se detectó GPU, usando CPU
+2025-05-21 02:32:37,000 - api.main - INFO - Memoria total: 5.85 GB
+2025-05-21 02:32:37,001 - api.main - INFO - Memoria disponible: 0.28 GB
+2025-05-21 02:32:58,314 - api.main - INFO - Request: OPTIONS /upload | Status: 200 | Duration: 0.0010s | Client: 127.0.0.1
+2025-05-21 02:32:58,334 - api.main - INFO - [Auto-ID] documentId generado: hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_bitcoin_1747805578
+2025-05-21 02:32:58,360 - api.main - INFO - Archivo guardado en: C:\Users\Gonzalo\Desktop\cosas\rag-backend\api\..\docs\hZoG4fAPL8XsHE7Y2YLVl4r0ydg2\hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_bitcoin_1747805578\bitcoin.pdf
+2025-05-21 02:32:58,361 - ingest - INFO - Ingestando archivo único: bitcoin.pdf
+2025-05-21 02:32:58,361 - ingest - INFO - Procesando bitcoin.pdf...
+2025-05-21 02:33:00,747 - ingest - INFO - Chunking dinámico para bitcoin.pdf: size=338, overlap=112 (doc tipo: scientific_pdf, densidad: 0.26)
+2025-05-21 02:33:14,808 - ingest - INFO - Conectando a PGVector. Colección: hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_bitcoin_1747805578. Reset colección: True
+2025-05-21 02:33:20,185 - langchain_community.vectorstores.pgvector - WARNING - Collection not found
+2025-05-21 02:33:21,052 - ingest - INFO - Iniciando inserción de 97 embeddings en 1 lotes de tamaño 100.
+2025-05-21 02:33:26,905 - ingest - INFO - Insertados 97 documentos en la colección 'hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_hZoG4fAPL8XsHE7Y2YLVl4r0ydg2_bitcoin_1747805578'.
+2025-05-21 02:33:26,906 - ingest - INFO - Ingesta de bitcoin.pdf finalizada exitosamente
+2025-05-21 02:33:26,936 - api.main - INFO - Request: POST /upload | Status: 200 | Duration: 28.6163s | Client: 127.0.0.1
+2025-05-21 02:34:03,845 - api.main - INFO - Inicializando modelo de embeddings
+2025-05-21 02:34:03,895 - sentence_transformers.SentenceTransformer - INFO - Load pretrained SentenceTransformer: intfloat/multilingual-e5-base
+2025-05-21 02:34:18,093 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747805658-ae8442", "timestamp": "2025-05-21T02:34:18.092520", "query_length": 91, "detected_language": null, "client_ip": "127.0.0.1", "detailed_feedback_requested": true}
+2025-05-21 02:34:25,514 - api.main - INFO - Document in en, query in es
+2025-05-21 02:34:30,169 - api.translation - INFO - Initializing translation model Helsinki-NLP/opus-mt-es-en on CPU
+2025-05-21 02:34:35,213 - api.translation - INFO - Successfully translated text from es to en
+2025-05-21 02:34:35,233 - api.main - INFO - Query translated from es to en
+2025-05-21 02:34:39,986 - api.main - INFO - Retrieved 4 documents from translated query
+2025-05-21 02:34:39,987 - api.main - INFO - After merging: 6 unique documents
+2025-05-21 02:34:42,526 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:35:01,820 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 58.0742s | Client: 127.0.0.1
+2025-05-21 02:35:01,827 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:35:01.827749", "query_length": 91, "num_sources": 6, "execution_time": 57.96481490135193, "language": "unknown"}
+2025-05-21 02:35:28,625 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747805728-61e41f", "timestamp": "2025-05-21T02:35:28.625113", "query_length": 140, "detected_language": null, "client_ip": "127.0.0.1", "detailed_feedback_requested": true}
+2025-05-21 02:35:34,819 - api.main - INFO - Document in en, query in es
+2025-05-21 02:35:39,381 - api.translation - INFO - Initializing translation model Helsinki-NLP/opus-mt-es-en on CPU
+2025-05-21 02:35:43,895 - api.translation - INFO - Successfully translated text from es to en
+2025-05-21 02:35:43,915 - api.main - INFO - Query translated from es to en
+2025-05-21 02:35:48,394 - api.main - INFO - Retrieved 4 documents from translated query
+2025-05-21 02:35:48,395 - api.main - INFO - After merging: 6 unique documents
+2025-05-21 02:35:49,166 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:36:12,687 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 54.1361s | Client: 127.0.0.1
+2025-05-21 02:36:12,696 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:36:12.696012", "query_length": 140, "num_sources": 5, "execution_time": 54.09558939933777, "language": "unknown"}
+2025-05-21 02:36:51,054 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747805811-e62625", "timestamp": "2025-05-21T02:36:51.054828", "query_length": 148, "detected_language": null, "client_ip": "127.0.0.1", "detailed_feedback_requested": true}
+2025-05-21 02:36:58,107 - api.main - INFO - Document in en, query in es
+2025-05-21 02:37:03,933 - api.translation - INFO - Initializing translation model Helsinki-NLP/opus-mt-es-en on CPU
+2025-05-21 02:37:08,182 - api.translation - INFO - Successfully translated text from es to en
+2025-05-21 02:37:08,207 - api.main - INFO - Query translated from es to en
+2025-05-21 02:37:12,856 - api.main - INFO - Retrieved 4 documents from translated query
+2025-05-21 02:37:12,856 - api.main - INFO - After merging: 6 unique documents
+2025-05-21 02:37:14,127 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:37:31,009 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 49.8176s | Client: 127.0.0.1
+2025-05-21 02:37:31,017 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:37:31.017705", "query_length": 148, "num_sources": 6, "execution_time": 49.78210997581482, "language": "unknown"}
+2025-05-21 02:39:06,478 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747805946-affaf9", "timestamp": "2025-05-21T02:39:06.478230", "query_length": 101, "detected_language": null, "client_ip": "127.0.0.1", "detailed_feedback_requested": true}
+2025-05-21 02:39:13,012 - api.main - INFO - Document in en, query in es
+2025-05-21 02:39:17,265 - api.translation - INFO - Initializing translation model Helsinki-NLP/opus-mt-es-en on CPU
+2025-05-21 02:39:21,158 - api.translation - INFO - Successfully translated text from es to en
+2025-05-21 02:39:21,176 - api.main - INFO - Query translated from es to en
+2025-05-21 02:39:25,279 - api.main - INFO - Retrieved 4 documents from translated query
+2025-05-21 02:39:25,280 - api.main - INFO - After merging: 6 unique documents
+2025-05-21 02:39:25,824 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:39:39,831 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 44.6406s | Client: 127.0.0.1
+2025-05-21 02:39:39,840 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:39:39.840080", "query_length": 101, "num_sources": 6, "execution_time": 44.58984684944153, "language": "unknown"}
+2025-05-21 02:40:29,456 - api.main - INFO - Nueva consulta recibida: {"query_id": "q-1747806029-c50a84", "timestamp": "2025-05-21T02:40:29.456379", "query_length": 106, "detected_language": null, "client_ip": "127.0.0.1", "detailed_feedback_requested": true}
+2025-05-21 02:40:35,262 - api.main - INFO - Document in en, query in es
+2025-05-21 02:40:40,025 - api.translation - INFO - Initializing translation model Helsinki-NLP/opus-mt-es-en on CPU
+2025-05-21 02:40:43,792 - api.translation - INFO - Successfully translated text from es to en
+2025-05-21 02:40:43,806 - api.main - INFO - Query translated from es to en
+2025-05-21 02:40:48,040 - api.main - INFO - Retrieved 4 documents from translated query
+2025-05-21 02:40:48,040 - api.main - INFO - After merging: 4 unique documents
+2025-05-21 02:40:48,558 - httpx - INFO - HTTP Request: POST https://api.deepseek.com/v1/chat/completions "HTTP/1.1 200 OK"
+2025-05-21 02:40:56,842 - api.main - INFO - Request: POST /query | Status: 200 | Duration: 38.2299s | Client: 127.0.0.1
+2025-05-21 02:40:56,845 - api.main - INFO - Métricas de consulta: {"timestamp": "2025-05-21T02:40:56.845925", "query_length": 106, "num_sources": 3, "execution_time": 38.19456148147583, "language": "unknown"}
+2025-05-21 02:46:02,249 - api.main - INFO - Cerrando recursos y conexiones

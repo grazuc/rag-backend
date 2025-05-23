@@ -44,7 +44,7 @@ from langchain_deepseek import ChatDeepSeek
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-from translation import translate_text
+from .translation import translate_text
 
 from transformers import pipeline
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
@@ -336,7 +336,7 @@ app = FastAPI(
 # MODIFICADO: Middleware y seguridad
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.cors_origins,
+    allow_origins=["*"],  ##settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -933,6 +933,19 @@ def generate_document_id(user_id: str, filename: str) -> str:
     return f"{user_id}_{name_part}_{timestamp}"
 
 
+from ingest import ingest_single_file, IngestConfig, DocumentProcessor
+from langchain_community.embeddings import HuggingFaceEmbeddings
+from pathlib import Path
+
+# Precarga de config y modelo global (fuera del endpoint)
+config = IngestConfig()
+
+embedding_model = HuggingFaceEmbeddings(
+    model_name=config.embed_model,
+    model_kwargs={"device": "cuda" if torch.cuda.is_available() else "cpu"},
+    encode_kwargs={"normalize_embeddings": True}
+)
+
 @app.post("/upload")
 async def upload_document(
     file: UploadFile = File(...),
@@ -954,43 +967,44 @@ async def upload_document(
         
         # Crear directorio específico según userId y documentId
         target_dir = docs_base_dir
-        collection_name = settings.collection_name
+        
+        import dataclasses
+        dynamic_docs_dir = Path(target_dir).parent
+
         
         if userId:
             target_dir = os.path.join(target_dir, userId)
-    
+
             if not documentId:
                 documentId = generate_document_id(userId, filename)
                 logger.info(f"[Auto-ID] documentId generado: {documentId}")
-    
+
             target_dir = os.path.join(target_dir, documentId)
+            
             collection_name = sanitize_pg_identifier(f"{userId}_{documentId}")
         
-        # Asegurar que el directorio existe con permisos adecuados
+        current_config = dataclasses.replace(config, collection_name=collection_name, docs_dir=Path(target_dir).parent,reset_vector_collection=True )
+        doc_processor = DocumentProcessor(current_config)
+
         os.makedirs(target_dir, exist_ok=True)
-        # Intentar establecer permisos (puede fallar en algunos entornos)
         try:
             os.chmod(target_dir, 0o755)
         except:
             pass
-            
+
         # Ruta completa del archivo
         file_path = os.path.join(target_dir, filename)
-        
-        # Guardar archivo con mejor manejo de errores
+
+        # Guardar archivo
         try:
             with open(file_path, "wb") as buffer:
-                # Leer en chunks para archivos grandes
                 CHUNK_SIZE = 1024 * 1024  # 1MB
                 content = await file.read(CHUNK_SIZE)
                 while content:
                     buffer.write(content)
                     content = await file.read(CHUNK_SIZE)
-                    
-            # Verificar que el archivo se guardó correctamente
             if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
                 raise ValueError("El archivo no se guardó correctamente o está vacío")
-                
             logger.info(f"Archivo guardado en: {file_path}")
         except Exception as e:
             logger.error(f"Error guardando archivo: {str(e)}")
@@ -998,88 +1012,29 @@ async def upload_document(
                 status_code=500,
                 content={"detail": f"Error al guardar el archivo: {str(e)}"}
             )
-        
-        # Ejecutar ingest.py como subproceso
-        python_exec = sys.executable
-        ingest_path = os.path.abspath(os.path.join(base_dir, "..", "ingest.py"))
-        
-        logger.info(f"Ejecutando: {python_exec} {ingest_path}")
-        logger.info(f"Parámetros: docs_dir={target_dir}, ext={ext}, collection={collection_name}")
-        
-        # Construir comando con argumentos explícitos
-        cmd = [
-            python_exec, 
-            ingest_path,
-            "--docs-dir", target_dir,
-            f"--extensions={ext}",
-            "--collection", collection_name,
-            "--reset-cache",
-            "--reset-vector-collection",
-        ]
-        
-        try:
-            # Agregar el argumento --document-id si está presente
-            env = os.environ.copy()
-            env["DOCUMENT_ID"] = documentId
-            # Ejecutar con límite de tiempo ampliado
-            process = await asyncio.create_subprocess_exec(
-                *cmd,
-                stdout=asyncio.subprocess.PIPE,
-                stderr=asyncio.subprocess.PIPE,
-                env=env
-            )
-            
-            # Esperar con timeout
-            try:
-                stdout, stderr = await asyncio.wait_for(process.communicate(), timeout=900)  # 15 minutos
 
-                stdout_text = stdout.decode('utf-8', errors='replace')
-                stderr_text = stderr.decode('utf-8', errors='replace')
-                logger.info(f"[STDOUT ingest.py]\n{stdout_text[:1000]}")
-                logger.info(f"[STDERR ingest.py]\n{stderr_text[:1000]}")
+        # ⚡ Llamada directa a ingest_single_file (sin subprocess)
+        success = ingest_single_file(
+            Path(file_path),
+            current_config,
+            doc_processor,
+            embedding_model,
+            settings.pg_conn
+        )
 
-                
-                if process.returncode != 0:
-                    logger.error(f"Error en ingest.py (código {process.returncode}):")
-                    logger.error(f"STDOUT: {stdout_text[:1000]}")
-                    logger.error(f"STDERR: {stderr_text[:1000]}")
-                    return JSONResponse(
-                        status_code=500,
-                        content={
-                            "detail": "Error al procesar el documento",
-                            "stdout": stdout_text[:500],
-                            "stderr": stderr_text[:500]
-                        }
-                    )
-                else:
-                    logger.info("Ingesta completada exitosamente")
-                    logger.debug(f"STDOUT: {stdout_text[:500]}")
-                    
-            except asyncio.TimeoutError:
-                # Intentar terminar el proceso
-                try:
-                    process.terminate()
-                    await asyncio.sleep(0.5)
-                    process.kill()
-                except:
-                    pass
-                    
-                logger.error("Timeout ejecutando ingest.py")
-                return JSONResponse(
-                    status_code=500,
-                    content={"detail": "El procesamiento del documento excedió el tiempo límite (15 minutos)"}
-                )
-                
-        except Exception as e:
-            logger.error(f"Error ejecutando ingest.py: {str(e)}")
-            logger.error(traceback.format_exc())
+        if not success:
             return JSONResponse(
                 status_code=500,
-                content={"detail": f"Error al ejecutar el proceso de ingesta: {str(e)}"}
+                content={"detail": "Error al procesar el documento"}
             )
-            
-        return {"detail": "Documento procesado correctamente", "filepath": file_path, "documentId": documentId, "collection": collection_name}
-        
+
+        return {
+            "detail": "Documento procesado correctamente",
+            "filepath": file_path,
+            "documentId": documentId,
+            "collection": collection_name
+        }
+
     except HTTPException as he:
         raise he
     except Exception as e:
@@ -1089,6 +1044,7 @@ async def upload_document(
             status_code=500,
             content={"detail": f"Error inesperado: {str(e)}"}
         )
+
 
 # MODIFICADO: Punto de entrada mejorado
 if __name__ == "__main__":
