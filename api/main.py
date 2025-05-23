@@ -985,6 +985,7 @@ async def upload_document(
             
             collection_name = sanitize_pg_identifier(f"{userId}_{documentId}")
         
+        os.makedirs(CACHE_DIR, exist_ok=True)  # esto fuerza su existencia en Docker
         current_config = dataclasses.replace(config, collection_name=collection_name, docs_dir=Path(target_dir).parent,cache_dir=Path(CACHE_DIR),reset_vector_collection=True )
         doc_processor = DocumentProcessor(current_config)
 
