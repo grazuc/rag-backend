@@ -939,7 +939,8 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 from pathlib import Path
 
 # Precarga de config y modelo global (fuera del endpoint)
-config = IngestConfig()
+from ingest import CACHE_DIR  # 👈 importás el path correcto desde ingest.py
+config = IngestConfig(cache_dir=Path(CACHE_DIR))
 
 embedding_model = HuggingFaceEmbeddings(
     model_name=config.embed_model,
