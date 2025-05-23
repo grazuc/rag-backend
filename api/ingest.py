@@ -224,7 +224,8 @@ class DocumentProcessor:
     def mark_file_processed(self, file_path: Path):
         """Marca un archivo como procesado en el caché"""
         file_stat = file_path.stat()
-        self.processed_files[file_path.name] = {
+        file_key = str(file_path.relative_to(self.config.docs_dir))
+        self.processed_files[file_key] = {
             "size": file_stat.st_size,
             "mtime": file_stat.st_mtime,
             "last_processed": time.time()
