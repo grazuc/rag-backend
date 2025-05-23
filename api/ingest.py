@@ -54,7 +54,6 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CACHE_DIR = os.path.join(BASE_DIR, ".cache")
 os.makedirs(CACHE_DIR, exist_ok=True)
 
-
 # Configurar logging
 logging.basicConfig(
     level=logging.INFO,
@@ -176,7 +175,7 @@ class DocumentProcessor:
     
     def __init__(self, config: IngestConfig):
         self.config = config
-        self.cache_file = config.cache_dir / "processed_files.json"
+        self.cache_file = self.config.cache_dir / "processed_files.json"
         self.processed_files = self._load_processed_files()
         
     def _load_processed_files(self) -> Dict[str, Dict[str, Any]]:
