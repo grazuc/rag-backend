@@ -44,8 +44,6 @@ from langchain_deepseek import ChatDeepSeek
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-from translation import translate_text
-
 from transformers import pipeline
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
 
@@ -222,6 +220,11 @@ async def lifespan(app: FastAPI):
         memory = psutil.virtual_memory()
         logger.info(f"Memoria total: {memory.total / 1024**3:.2f} GB")
         logger.info(f"Memoria disponible: {memory.available / 1024**3:.2f} GB")
+        
+        # Inicializar componentes
+        get_embeddings()
+        get_translator()
+        get_llm()
         
     except Exception as e:
         logger.error(f"Error durante la inicialización: {e}")
@@ -580,23 +583,29 @@ def rewrite_query(query: str, llm) -> Optional[str]:
 _translator = None
 
 def get_translator():
-    """Inicializa y retorna el modelo de traducción"""
     global _translator
-    
+    if _translator is None:
+        _translator = pipeline(
+            task="translation",
+            model="Helsinki-NLP/opus-mt-es-en",
+            tokenizer="Helsinki-NLP/opus-mt-es-en",
+            framework="pt"
+        )
+    return _translator
+
+def translate_text(text: str, source_lang: str, target_lang: str) -> str:
+    if source_lang == target_lang:
+        return text
     try:
-        if _translator is None:
-            # Usar MarianMT que usa el tokenizer estándar
-            _translator = pipeline(
-                task="translation",
-                model="Helsinki-NLP/opus-mt-es-en",
-                tokenizer="Helsinki-NLP/opus-mt-es-en",
-                framework="pt"
-            )
-        return _translator
-            
+        translator = get_translator()
+        result = translator(text, max_length=512)
+        if isinstance(result, list) and result:
+            return result[0]['translation_text']
+        return text
     except Exception as e:
-        logger.error(f"Error al inicializar traductor: {e}")
-        return None
+        logger.warning(f"Error en traducción: {e}")
+        return text
+
 
 def translate_query(query: str, source_lang: str, target_lang: str) -> str:
     """Translate the query if needed"""
