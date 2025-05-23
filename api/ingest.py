@@ -1709,6 +1709,7 @@ def ingest_single_file(
     Ingiere un solo archivo desde FastAPI u otro backend en memoria, sin subprocess.
     """
     try:
+        os.makedirs(config.cache_dir, exist_ok=True)
         logger.info(f"Ingestando archivo único: {file_path.name}")
         chunks = process_file(file_path, config, doc_processor)
         if not chunks:
