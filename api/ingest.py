@@ -102,7 +102,7 @@ def load_config() -> Tuple[IngestConfig, str]:
     parser = argparse.ArgumentParser(description="Ingesta de documentos para RAG")
     parser.add_argument("--docs-dir", type=str, default="docs", 
                         help="Directorio con documentos a ingerir")
-    parser.add_argument("--cache-dir", type=str, default=".cache",
+    parser.add_argument("--cache-dir", type=str, default="CACHE_DIR",
                         help="Directorio para caché de procesamiento")
     parser.add_argument("--model", type=str, default="intfloat/multilingual-e5-base",
                         help="Modelo de embeddings a utilizar")
@@ -175,6 +175,7 @@ class DocumentProcessor:
     
     def __init__(self, config: IngestConfig):
         self.config = config
+        os.makedirs(self.config.cache_dir, exist_ok=True)  # ⚠️ Asegura que el path existe siempre
         self.cache_file = self.config.cache_dir / "processed_files.json"
         self.processed_files = self._load_processed_files()
         
