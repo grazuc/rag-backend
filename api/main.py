@@ -44,7 +44,7 @@ from langchain_deepseek import ChatDeepSeek
 from langchain.callbacks.manager import CallbackManager
 from langchain.callbacks.streaming_stdout import StreamingStdOutCallbackHandler
 
-from .translation import translate_text
+from translation import translate_text
 
 from transformers import pipeline
 from tenacity import retry, stop_after_attempt, wait_exponential, RetryError
@@ -54,6 +54,7 @@ import subprocess
 from supabase import create_client, Client  # pip install supabase
 from google.oauth2 import id_token
 from google.auth.transport import requests
+
 
 # MODIFICADO: Configuración de logging mejorada
 logging.basicConfig(
